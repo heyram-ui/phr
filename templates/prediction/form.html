@@ -1,97 +1,188 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="glass-card animate-in">
-            <h2 class="text-center mb-5"><i class="fas fa-notes-medical me-2"></i>Daily Health Assessment</h2>
+<style>
+.hero{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;padding:36px 0 24px;}
+.fc{background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.07);padding:28px;margin-bottom:20px;border-left:5px solid #0d6e6e;}
+.fc h5{font-weight:700;color:#1e3a5f;margin-bottom:18px;}
+.form-label{font-weight:600;color:#333;margin-bottom:6px;}
+.form-control,.form-select{border:2px solid #e0e0e0;border-radius:10px;padding:10px 14px;font-size:15px;}
+.form-control:focus,.form-select:focus{border-color:#0d6e6e;box-shadow:0 0 0 3px rgba(13,110,110,0.1);}
+.auto-filled{border-color:#27ae60!important;background:#f0fff4!important;}
+.af-badge{background:#27ae60;color:white;font-size:10px;padding:2px 7px;border-radius:8px;margin-left:5px;}
+.hint{font-size:12px;color:#888;margin-top:3px;}
+.sbtn{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;border:none;padding:16px 40px;border-radius:50px;font-size:17px;font-weight:700;width:100%;cursor:pointer;box-shadow:0 6px 20px rgba(13,110,110,0.3);}
+.sbtn:hover{transform:translateY(-2px);}
+</style>
 
-            <form action="/assess" method="POST">
-                <!-- Section 1: Vitals -->
-                <h5 class="text-primary mb-3"><i class="fas fa-heartbeat me-2"></i>Physical Vitals</h5>
-                <div class="row mb-4">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Systolic BP</label>
-                        <input type="number" name="bp_sys" class="form-control form-glass" placeholder="120" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Diastolic BP</label>
-                        <input type="number" name="bp_dias" class="form-control form-glass" placeholder="80" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Glucose (mg/dL)</label>
-                        <input type="number" name="glucose" class="form-control form-glass" placeholder="100" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">BMI</label>
-                        <input type="number" step="0.1" name="bmi" class="form-control form-glass" placeholder="22.5"
-                            required>
-                    </div>
-                </div>
-
-                <!-- Section 2: Lifestyle -->
-                <h5 class="text-primary mb-3"><i class="fas fa-glass-martini-alt me-2"></i>Lifestyle Habits</h5>
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Smoking Status</label>
-                        <select name="smoking" class="form-select form-glass">
-                            <option value="0">Non-Smoker</option>
-                            <option value="1">Occasional</option>
-                            <option value="2">Regular</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Alcohol Consumption</label>
-                        <select name="alcohol" class="form-select form-glass">
-                            <option value="none">None</option>
-                            <option value="moderate">Moderate</option>
-                            <option value="heavy">Heavy</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Daily Water (Liters)</label>
-                        <input type="number" step="0.5" name="water" class="form-control form-glass" placeholder="2.5">
-                    </div>
-                </div>
-
-                <!-- Section 3: Routine -->
-                <h5 class="text-primary mb-3"><i class="fas fa-clock me-2"></i>Daily Routine</h5>
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Sleep Duration (Hours)</label>
-                        <input type="number" step="0.5" name="sleep_hours" class="form-control form-glass"
-                            placeholder="7.5" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Screen Time (Hours)</label>
-                        <input type="number" step="0.5" name="screen_time" class="form-control form-glass"
-                            placeholder="4.0" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Physical Activity (Mins)</label>
-                        <input type="number" name="activity_mins" class="form-control form-glass" placeholder="30"
-                            required>
-                    </div>
-                </div>
-
-                <!-- Section 4: Mental -->
-                <h5 class="text-primary mb-3"><i class="fas fa-brain me-2"></i>Mental Well-being</h5>
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <label class="form-label">Stress Level (1-10)</label>
-                        <input type="range" name="stress" class="form-range" min="1" max="10" step="1"
-                            oninput="this.nextElementSibling.value = this.value">
-                        <output>5</output>
-                    </div>
-                </div>
-
-                <div class="text-center mt-5">
-                    <button type="submit" class="btn btn-primary-glass btn-lg px-5">
-                        <i class="fas fa-chart-line me-2"></i>Analyze Health Risks
-                    </button>
-                </div>
-            </form>
-        </div>
+<div class="hero">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="fas fa-heartbeat me-2"></i>Health Risk Assessment</h2>
+    {% if pre %}
+    <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 18px;display:inline-block;margin-top:8px;font-size:14px;">
+      ✅ Pre-Checkup loaded — BMI <strong>{{ pre.bmi }}</strong>, BP <strong>{{ pre.bp_sys }}/{{ pre.bp_dias }}</strong> auto-filled below
     </div>
+    {% else %}
+    <p class="mb-0 mt-1" style="opacity:0.85">Fill your details to get AI-powered health risk prediction.</p>
+    {% endif %}
+  </div>
 </div>
+
+<div class="container py-4">
+<div class="row justify-content-center"><div class="col-lg-8">
+
+{% if not pre %}
+<div class="alert alert-info border-0 rounded-3 mb-3" style="font-size:14px;">
+  💡 <strong>Save time:</strong> Use the <a href="/calculators" class="fw-bold">Pre-Checkup Calculator</a> first — it will auto-fill BMI, BP and all values here.
+</div>
+{% endif %}
+
+<form method="POST" action="/assess">
+
+  <!-- VITALS -->
+  <div class="fc">
+    <h5>🩺 Physical Vitals</h5>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label">Age {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="age" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.age if pre else '' }}" min="10" max="100" placeholder="30" required>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Weight (kg) {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="weight" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.weight if pre else '' }}" step="0.1" placeholder="70" required>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Height (cm) {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="height" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.height if pre else '' }}" step="0.1" placeholder="170" required>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">BMI {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="bmi" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.bmi if pre else '' }}" step="0.1" placeholder="22.5" required>
+        {% if pre %}<div class="hint">{{ pre.bmi_cat }}</div>{% else %}<div class="hint"><a href="/calculators">Calculate →</a></div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOOD PRESSURE -->
+  <div class="fc">
+    <h5>❤️ Blood Pressure</h5>
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="hasBP" name="has_bp_measurement" value="yes" onchange="toggleBP(this.checked)" {% if not pre %}checked{% endif %}>
+          <label class="form-check-label fw-semibold" for="hasBP">I have my exact BP reading</label>
+        </div>
+        {% if not pre %}<div class="hint mt-1">Uncheck this if you want BP to be estimated automatically from your lifestyle.</div>{% endif %}
+      </div>
+      <div class="col-md-6" id="bpSysWrap">
+        <label class="form-label">Systolic (upper) {% if pre %}<span class="af-badge">Estimated ✓</span>{% endif %}</label>
+        <input type="number" name="bp_sys" id="bpSys" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.bp_sys if pre else '' }}" placeholder="120">
+        {% if pre %}<div class="hint">{{ pre.bp_cat }}</div>{% else %}<div class="hint"><a href="/calculators">Estimate it →</a></div>{% endif %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Diastolic (lower) {% if pre %}<span class="af-badge">Estimated ✓</span>{% endif %}</label>
+        <input type="number" name="bp_dias" id="bpDias" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.bp_dias if pre else '' }}" placeholder="80">
+      </div>
+    </div>
+  </div>
+
+  <!-- GLUCOSE -->
+  <div class="fc">
+    <h5>🩸 Blood Glucose <span style="font-weight:400;font-size:14px;color:#888">(optional)</span></h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Fasting Glucose (mg/dL) {% if pre and pre.glucose > 0 %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="glucose" class="form-control {% if pre and pre.glucose > 0 %}auto-filled{% endif %}" value="{{ pre.glucose if pre and pre.glucose > 0 else '' }}" step="0.1" placeholder="Leave blank if unknown">
+        {% if pre and pre.glucose > 0 %}<div class="hint">{{ pre.glucose_cat }}</div>{% else %}<div class="hint">Normal: 70–99 mg/dL. Leave blank if you don't know.</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- LIFESTYLE -->
+  <div class="fc">
+    <h5>🌙 Daily Routine</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Sleep (hrs/night) {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="sleep_hours" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.sleep_hours if pre else '' }}" step="0.5" min="1" max="14" placeholder="7" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Exercise (min/day) {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="activity_mins" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.activity_mins if pre else '' }}" min="0" max="300" placeholder="30" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Screen time (hrs/day) {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="number" name="screen_time" class="form-control {% if pre %}auto-filled{% endif %}" value="{{ pre.screen_time if pre else '' }}" step="0.5" min="0" max="24" placeholder="6" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Water intake (glasses/day)</label>
+        <input type="number" name="water_intake" class="form-control" value="8" min="1" max="20">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Sedentary hours/day (sitting)</label>
+        <input type="number" name="sedentary_hours" class="form-control" value="8" min="0" max="24">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Stress Level: <strong id="sv" class="text-primary">{{ pre.stress if pre else 5 }}</strong>/10 {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <input type="range" name="stress" class="form-range" min="1" max="10" value="{{ pre.stress if pre else 5 }}" oninput="document.getElementById('sv').textContent=this.value">
+        <div class="d-flex justify-content-between hint"><span>1 = Calm</span><span>10 = Very Stressed</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RISK FACTORS -->
+  <div class="fc">
+    <h5>⚠️ Risk Factors</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Smoking {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <select name="smoking" class="form-select {% if pre %}auto-filled{% endif %}">
+          <option value="no"  {% if not pre or pre.smoking=='no'  %}selected{% endif %}>No</option>
+          <option value="yes" {% if pre and pre.smoking=='yes' %}selected{% endif %}>Yes</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Alcohol {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <select name="alcohol" class="form-select {% if pre %}auto-filled{% endif %}">
+          <option value="never"  {% if not pre or pre.alcohol=='never'  %}selected{% endif %}>Never</option>
+          <option value="rarely" {% if pre and pre.alcohol=='rarely' %}selected{% endif %}>Rarely</option>
+          <option value="weekly" {% if pre and pre.alcohol=='weekly' %}selected{% endif %}>Weekly</option>
+          <option value="daily"  {% if pre and pre.alcohol=='daily'  %}selected{% endif %}>Daily</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Salt intake {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <select name="salt_intake" class="form-select {% if pre %}auto-filled{% endif %}">
+          <option value="low"    {% if pre and pre.salt_intake=='low'    %}selected{% endif %}>Low</option>
+          <option value="medium" {% if not pre or pre.salt_intake=='medium' %}selected{% endif %}>Medium</option>
+          <option value="high"   {% if pre and pre.salt_intake=='high'   %}selected{% endif %}>High</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Family history of BP? {% if pre %}<span class="af-badge">✓</span>{% endif %}</label>
+        <select name="family_history_bp" class="form-select {% if pre %}auto-filled{% endif %}">
+          <option value="no"  {% if not pre or pre.family_history_bp=='no'  %}selected{% endif %}>No</option>
+          <option value="yes" {% if pre and pre.family_history_bp=='yes' %}selected{% endif %}>Yes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="sbtn mb-4">
+    <i class="fas fa-chart-line me-2"></i>Predict My Health Risk Now
+  </button>
+</form>
+
+</div></div></div>
+
+<script>
+function toggleBP(show){
+  document.getElementById('bpSysWrap').style.opacity=show?1:0.4;
+  document.getElementById('bpSys').required=show;
+  document.getElementById('bpDias').required=show;
+}
+{% if pre %}
+document.getElementById('hasBP').checked=false;
+toggleBP(false);
+{% endif %}
+</script>
 {% endblock %}

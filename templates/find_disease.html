@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .fd-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #0d6e6e 100%);
+        padding: 48px 0 36px;
+        color: white;
+    }
+    .fd-hero h1 { font-size: 2.2rem; font-weight: 800; }
+    .fd-hero p  { color: rgba(255,255,255,0.75); font-size: 1.05rem; }
+
+    .fd-card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .fd-section-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #0d6e6e;
+        margin-bottom: 14px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #e8f5f5;
+    }
+    .form-label { font-weight: 600; font-size: 13.5px; color: #444; }
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #dee2e6;
+        font-size: 14px;
+        padding: 10px 14px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6e6e;
+        box-shadow: 0 0 0 3px rgba(13,110,110,0.12);
+    }
+    .input-group-text {
+        background: #f0fafa;
+        border-color: #dee2e6;
+        color: #0d6e6e;
+        font-size: 14px;
+        border-radius: 10px 0 0 10px;
+    }
+    .input-group .form-control  { border-radius: 0 10px 10px 0; }
+    .input-group .form-select   { border-radius: 0 10px 10px 0; }
+
+    .range-value {
+        display: inline-block;
+        min-width: 38px;
+        text-align: center;
+        font-weight: 700;
+        color: #0d6e6e;
+        font-size: 15px;
+    }
+    .info-box {
+        background: #f0fafa;
+        border-left: 4px solid #0d6e6e;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 13.5px;
+        color: #444;
+    }
+    .btn-analyse {
+        background: linear-gradient(135deg, #0d6e6e, #1e3a5f);
+        border: none;
+        border-radius: 50px;
+        padding: 14px 48px;
+        font-size: 16px;
+        font-weight: 700;
+        color: white;
+        transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-analyse:hover {
+        opacity: 0.9; transform: translateY(-2px); color: white;
+    }
+    .badge-count {
+        background: rgba(255,255,255,0.2);
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+
+<!-- Hero -->
+<div class="fd-hero">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-microscope me-3"></i>64-Disease Analyser</h1>
+                <p class="mb-0">Enter your health metrics to find which of 64 diseases you may be at risk for.</p>
+            </div>
+            <span class="badge-count"><i class="fas fa-database me-2"></i>64 Diseases Loaded</span>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <form action="/predict_disease" method="POST">
+
+        <div class="row g-4">
+
+            <!-- ── LEFT COLUMN ── -->
+            <div class="col-lg-6">
+
+                <!-- Basic Info -->
+                <div class="card fd-card p-4 mb-4">
+                    <p class="fd-section-title"><i class="fas fa-user me-2"></i>Basic Information</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Age</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
+                                <input type="number" name="age" class="form-control"
+                                       placeholder="e.g. 35" min="1" max="120" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Weight (kg)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-weight"></i></span>
+                                <input type="number" name="weight" class="form-control"
+                                       placeholder="e.g. 70" min="20" max="300" step="0.1" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Height (cm)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-ruler-vertical"></i></span>
+                                <input type="number" name="height" class="form-control"
+                                       placeholder="e.g. 170" min="100" max="250" step="0.1" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Fasting Glucose (mg/dL)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tint"></i></span>
+                                <input type="number" name="glucose" class="form-control"
+                                       placeholder="e.g. 95" min="40" max="500" step="0.1" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blood Pressure -->
+                <div class="card fd-card p-4 mb-4">
+                    <p class="fd-section-title"><i class="fas fa-tachometer-alt me-2"></i>Blood Pressure</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Systolic (mmHg)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">SYS</span>
+                                <input type="number" name="bp_sys" class="form-control"
+                                       placeholder="e.g. 120" min="70" max="220" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Diastolic (mmHg)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">DIA</span>
+                                <input type="number" name="bp_dias" class="form-control"
+                                       placeholder="e.g. 80" min="40" max="140" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box mt-3">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Normal BP is around <strong>120/80 mmHg</strong>.
+                        If unsure, use our
+                        <a href="/calculators" class="text-decoration-none fw-bold" style="color:#0d6e6e;">
+                            BP Calculator</a> first.
+                    </div>
+                </div>
+
+                <!-- Lifestyle -->
+                <div class="card fd-card p-4 mb-4">
+                    <p class="fd-section-title"><i class="fas fa-running me-2"></i>Lifestyle</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Sleep Hours / night</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" name="sleep_hours" class="form-range flex-grow-1"
+                                       min="2" max="12" step="0.5" value="7"
+                                       oninput="document.getElementById('sleepVal').textContent=this.value">
+                                <span class="range-value" id="sleepVal">7</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Screen Time (hrs/day)</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" name="screen_time" class="form-range flex-grow-1"
+                                       min="0" max="16" step="0.5" value="6"
+                                       oninput="document.getElementById('screenVal').textContent=this.value">
+                                <span class="range-value" id="screenVal">6</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Activity (mins/day)</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" name="activity_mins" class="form-range flex-grow-1"
+                                       min="0" max="180" step="5" value="30"
+                                       oninput="document.getElementById('actVal').textContent=this.value">
+                                <span class="range-value" id="actVal">30</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Stress Level</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-brain"></i></span>
+                                <select name="stress_level" class="form-select">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── RIGHT COLUMN ── -->
+            <div class="col-lg-6">
+
+                <!-- Habits -->
+                <div class="card fd-card p-4 mb-4">
+                    <p class="fd-section-title"><i class="fas fa-smoking me-2"></i>Habits</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Smoking</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-smoking"></i></span>
+                                <select name="smoking" class="form-select">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Alcohol Intake</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-wine-glass"></i></span>
+                                <select name="alcohol" class="form-select">
+                                    <option value="none">None</option>
+                                    <option value="occasional">Occasional</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="heavy">Heavy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disease categories info box -->
+                <div class="card fd-card p-4 mb-4"
+                     style="background:linear-gradient(135deg,#f0fafa,#e8f5f5);">
+                    <p class="fd-section-title"><i class="fas fa-list-alt me-2"></i>What We Analyse</p>
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-heartbeat text-danger mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Cardiovascular</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-tint text-warning mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Metabolic</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-bed text-primary mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Sleep &amp; Neuro</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-lungs text-info mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Respiratory</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-brain text-success mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Mental Health</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-white shadow-sm">
+                                <i class="fas fa-bone text-secondary mb-1 d-block"></i>
+                                <small class="fw-bold text-muted">Musculoskeletal</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-3 mb-0" style="font-size:12.5px;">
+                        <i class="fas fa-shield-alt me-1 text-success"></i>
+                        Analysis covers <strong>64 diseases</strong> across 6+ medical categories
+                        using your biometric and lifestyle data.
+                    </p>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="card fd-card p-4 mb-4"
+                     style="border-left: 4px solid #dc3545 !important;">
+                    <p class="fd-section-title text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Important Disclaimer
+                    </p>
+                    <p class="text-muted mb-0" style="font-size:13px;">
+                        This tool provides <strong>risk analysis only</strong> — not a medical diagnosis.
+                        Results are based on statistical patterns. Always consult a qualified physician
+                        for accurate diagnosis and treatment.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── SUBMIT ── -->
+        <div class="text-center mt-2 mb-5">
+            <button type="submit" class="btn btn-analyse shadow-lg">
+                <i class="fas fa-microscope me-2"></i>Analyse 64 Diseases Now
+            </button>
+            <p class="text-muted mt-3" style="font-size:12.5px;">
+                <i class="fas fa-lock me-1"></i>Your data is processed locally and not stored for this analysis.
+            </p>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

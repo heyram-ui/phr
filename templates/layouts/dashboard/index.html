@@ -36,7 +36,9 @@
             font-size: 3rem;
             font-weight: bold;
             background: linear-gradient(135deg, #4361ee, #3a0ca3);
-            -webkit-background-clip: text;
+            /* ✅ Add standard property right after the webkit one */
+-webkit-background-clip: text;
+background-clip: text;
             -webkit-text-fill-color: transparent;
         }
     </style>

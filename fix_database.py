@@ -1,35 +1,38 @@
 import sqlite3
-import os
 
-def fix_database():
-    print("Attempting to fix database schema...")
+def fix_db():
+    conn = sqlite3.connect('health.db')
+    c = conn.cursor()
     
-    db_path = 'health.db'
-    
-    if not os.path.exists(db_path):
-        print("Database does not exist. It will be created when you run the app.")
-        return
+    print("Fixing database schema...")
 
+    # Feedback Table (V5)
     try:
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-        
-        # Check if users table exists
-        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
-        if c.fetchone():
-            print("Found existing 'users' table. Dropping it to ensure clean schema...")
-            c.execute("DROP TABLE users")
-            conn.commit()
-            print("Table 'users' dropped successfully.")
-        else:
-            print("Table 'users' not found.")
-            
-        conn.close()
-        print("Database fixed. Please restart your application manually.")
-        
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                name TEXT,
+                rating INTEGER,
+                comment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        print("Feedback table created/verified.")
     except Exception as e:
-        print(f"Error fixing database: {e}")
-        print("If the file is locked, please stop the running Flask server (Ctrl+C) and try again.")
+        print(f"Error creating Feedback: {e}")
+
+    # Check for emergency_contact in users
+    try:
+        c.execute("SELECT emergency_contact FROM users LIMIT 1")
+    except sqlite3.OperationalError:
+        print("Adding emergency_contact column...")
+        c.execute("ALTER TABLE users ADD COLUMN emergency_contact TEXT")
+
+    conn.commit()
+    conn.close()
+    print("Database fixed successfully.")
 
 if __name__ == '__main__':
-    fix_database()
+    fix_db()

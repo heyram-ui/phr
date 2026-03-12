@@ -1,0 +1,473 @@
+<!-- 
+    File: templates/pages/pre_checkup.html
+    Location: Paste in your templates/pages/ folder
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pre-Checkup | Health Risk System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { border-radius: 15px 15px 0 0 !important; padding: 15px 20px; }
+        .section-icon { width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .form-control, .form-select { border-radius: 8px; border: 1.5px solid #e0e0e0; padding: 10px 15px; }
+        .form-control:focus, .form-select:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .btn-calculate { background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; padding: 15px 40px; border-radius: 25px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; }
+        .btn-calculate:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,123,255,0.4); }
+        .result-card { border-radius: 15px; padding: 15px 20px; margin: 10px 0; }
+        .result-green { background: #d4edda; border-left: 5px solid #28a745; }
+        .result-yellow { background: #fff3cd; border-left: 5px solid #ffc107; }
+        .result-orange { background: #ffe5d0; border-left: 5px solid #fd7e14; }
+        .result-red { background: #f8d7da; border-left: 5px solid #dc3545; }
+        .result-blue { background: #cce5ff; border-left: 5px solid #007bff; }
+        .hint-text { font-size: 12px; color: #6c757d; margin-top: 4px; }
+        .progress-bar-custom { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .step-badge { background: #007bff; color: white; border-radius: 50%; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 8px; }
+        .disclaimer-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 12px 15px; margin-top: 15px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container py-4" style="max-width: 750px;">
+    
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">
+            <i class="fas fa-clipboard-check me-2"></i>Pre-Checkup Calculator
+        </h2>
+        <p class="text-muted">Answer simple questions → We calculate your BP, BMI & Glucose automatically!</p>
+        
+        <!-- Progress Steps -->
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+            <span class="badge bg-primary px-3 py-2 rounded-pill">
+                <i class="fas fa-1 me-1"></i> Pre-Checkup
+            </span>
+            <i class="fas fa-arrow-right text-muted"></i>
+            <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                <i class="fas fa-2 me-1"></i> Health Assessment
+            </span>
+            <i class="fas fa-arrow-right text-muted"></i>
+            <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                <i class="fas fa-3 me-1"></i> Results
+            </span>
+        </div>
+    </div>
+
+    <form method="POST" action="/pre-checkup" id="preCheckupForm">
+        
+        <!-- ===== SECTION 1: PHYSICAL DETAILS ===== -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-user-circle me-2"></i>
+                <strong>Basic Physical Details</strong>
+                <small class="d-block mt-1 opacity-75">Used to calculate your exact BMI</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Age <span class="text-danger">*</span></label>
+                        <input type="number" name="age" class="form-control" placeholder="Enter your age" min="10" max="100" required value="{{ form_data.age if form_data else '' }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                        <select name="gender" class="form-select" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male" {% if form_data and form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if form_data and form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Weight (kg) <span class="text-danger">*</span></label>
+                        <input type="number" name="weight" class="form-control" placeholder="e.g. 70" min="20" max="200" step="0.1" required value="{{ form_data.weight if form_data else '' }}" oninput="calculateBMI()">
+                        <div class="hint-text"><i class="fas fa-info-circle"></i> Used to calculate BMI</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Height (cm) <span class="text-danger">*</span></label>
+                        <input type="number" name="height" class="form-control" placeholder="e.g. 170" min="100" max="250" step="0.1" required value="{{ form_data.height if form_data else '' }}" oninput="calculateBMI()">
+                        <div class="hint-text"><i class="fas fa-info-circle"></i> Used to calculate BMI</div>
+                    </div>
+                </div>
+                
+                <!-- BMI Preview -->
+                <div id="bmiPreview" class="result-card result-green" style="display:none;">
+                    <strong><i class="fas fa-calculator me-2"></i>BMI Calculated:</strong>
+                    <span id="bmiValue" class="fw-bold fs-5"></span>
+                    <span id="bmiCategory" class="badge ms-2"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SECTION 2: MORNING SYMPTOMS (BP Indicators) ===== -->
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-sun me-2"></i>
+                <strong>Morning Routine Symptoms</strong>
+                <small class="d-block mt-1 opacity-75">These directly indicate your Blood Pressure levels</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">How do you feel after waking up? <span class="text-danger">*</span></label>
+                        <select name="morning_feeling" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="fresh">😊 Fresh & Energetic</option>
+                            <option value="normal">😐 Normal</option>
+                            <option value="tired">😴 Tired</option>
+                            <option value="headache">🤕 Headache / Heavy head</option>
+                            <option value="dizzy">😵 Dizzy / Lightheaded</option>
+                        </select>
+                        <div class="hint-text">🩺 Headache = High BP indicator | Dizzy = Low BP indicator</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you feel dizzy when standing up suddenly?</label>
+                        <select name="dizzy_when_standing" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - I feel dizzy</option>
+                        </select>
+                        <div class="hint-text">🩺 This indicates LOW blood pressure</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you get frequent headaches?</label>
+                        <select name="headache_frequency" class="form-select">
+                            <option value="never">Never</option>
+                            <option value="rarely">Rarely</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="daily">Daily ⚠️</option>
+                        </select>
+                        <div class="hint-text">🩺 Daily headaches = Strong HIGH BP signal</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you get frequent nosebleeds?</label>
+                        <select name="frequent_nosebleeds" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                        <div class="hint-text">🩺 Nosebleeds can indicate HIGH BP</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you experience blurry vision?</label>
+                        <select name="blurry_vision" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                        <div class="hint-text">🩺 Vision issues indicate HIGH BP or Glucose</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you feel heart palpitations?</label>
+                        <select name="heart_palpitations" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Irregular/fast heartbeat</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SECTION 3: GLUCOSE INDICATORS ===== -->
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-tint me-2"></i>
+                <strong>Glucose / Blood Sugar Indicators</strong>
+                <small class="d-block mt-1 opacity-75">These symptoms help estimate your blood glucose</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Are you always feeling thirsty?</label>
+                        <select name="always_thirsty" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Always thirsty ⚠️</option>
+                        </select>
+                        <div class="hint-text">🩺 Excessive thirst is a key diabetes symptom</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you urinate very frequently?</label>
+                        <select name="frequent_urination" class="form-select">
+                            <option value="no">No - Normal</option>
+                            <option value="yes">Yes - Very frequently ⚠️</option>
+                        </select>
+                        <div class="hint-text">🩺 Frequent urination = Diabetes symptom</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you feel very tired after eating?</label>
+                        <select name="tired_after_eating" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Always crash after meals</option>
+                        </select>
+                        <div class="hint-text">🩺 Post-meal fatigue indicates glucose issues</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Do you eat sweets/desserts daily?</label>
+                        <select name="daily_sweets" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Daily sweets/sugary food</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">How much sugar do you consume?</label>
+                        <select name="sugar_intake" class="form-select">
+                            <option value="low">🟢 Low - I avoid sugar</option>
+                            <option value="medium" selected>🟡 Medium - Normal amount</option>
+                            <option value="high">🟠 High - I like sweet things</option>
+                            <option value="very_high">🔴 Very High - Sweet everything</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Family history of Diabetes?</label>
+                        <select name="family_history_diabetes" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Parent/sibling has diabetes</option>
+                        </select>
+                        <div class="hint-text">🩺 Genetic factor increases glucose risk by 15%</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">How many meals per day?</label>
+                        <select name="meal_timing" class="form-select">
+                            <option value="regular">Regular - 3 meals at proper times</option>
+                            <option value="irregular">Irregular - Eat whenever</option>
+                            <option value="skip_meals">Skip meals often</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Carbohydrate intake (rice, bread, roti)?</label>
+                        <select name="carb_intake" class="form-select">
+                            <option value="low">Low - Very little carbs</option>
+                            <option value="medium" selected>Medium - Moderate carbs</option>
+                            <option value="high">High - Heavy carbs every meal</option>
+                            <option value="very_high">Very High - Carbs dominant diet</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SECTION 4: LIFESTYLE (BP + Glucose) ===== -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-heart me-2"></i>
+                <strong>Lifestyle Habits</strong>
+                <small class="d-block mt-1 opacity-75">Affects both Blood Pressure and Glucose</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Smoking Status</label>
+                        <select name="smoking" class="form-select">
+                            <option value="non_smoker">🟢 Non-Smoker</option>
+                            <option value="occasional">🟡 Occasional Smoker</option>
+                            <option value="regular">🔴 Regular Smoker</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Alcohol Consumption</label>
+                        <select name="alcohol" class="form-select">
+                            <option value="none">🟢 None</option>
+                            <option value="moderate">🟡 Moderate</option>
+                            <option value="heavy">🔴 Heavy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Salt Intake</label>
+                        <select name="salt_intake" class="form-select">
+                            <option value="low">🟢 Low</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="high">🟠 High</option>
+                            <option value="very_high">🔴 Very High</option>
+                        </select>
+                        <div class="hint-text">🩺 Salt directly raises Blood Pressure</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Daily Water Intake (Liters)</label>
+                        <input type="number" name="water_liters" class="form-control" placeholder="e.g. 2.0" min="0" max="10" step="0.5" value="2.0">
+                        <div class="hint-text">🩺 Low water raises BP</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Exercise (Days per week)</label>
+                        <select name="exercise_days" class="form-select">
+                            <option value="0">🔴 0 - No exercise</option>
+                            <option value="2">🟡 1-2 days</option>
+                            <option value="3" selected>🟢 3-4 days</option>
+                            <option value="5">🟢 5+ days</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Sleep Duration (Hours)</label>
+                        <select name="sleep_hours" class="form-select">
+                            <option value="4">Less than 5 hours 🔴</option>
+                            <option value="5.5">5-6 hours 🟠</option>
+                            <option value="6.5">6-7 hours 🟡</option>
+                            <option value="8" selected>7-9 hours 🟢</option>
+                            <option value="10">More than 9 hours</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Stress Level (1-10)</label>
+                        <input type="range" name="stress_level" class="form-range" min="1" max="10" value="5" oninput="document.getElementById('stressVal').textContent=this.value">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-success">1 = No Stress</small>
+                            <strong id="stressVal">5</strong>
+                            <small class="text-danger">10 = Extreme</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Family History of High BP?</label>
+                        <select name="family_history_bp" class="form-select">
+                            <option value="no">No</option>
+                            <option value="yes">Yes - Parent/sibling has BP</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <div class="text-center mb-4">
+            <button type="submit" class="btn-calculate">
+                <i class="fas fa-calculator me-2"></i>
+                Calculate My BP, BMI & Glucose
+            </button>
+            <p class="text-muted mt-2 small">
+                <i class="fas fa-lock me-1"></i> Your data is secure and only used for health estimation
+            </p>
+        </div>
+
+    </form>
+
+    <!-- ===== RESULTS SECTION (Shows after form submit) ===== -->
+    {% if results %}
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>✅ Pre-Checkup Results - Calculated!</strong>
+        </div>
+        <div class="card-body">
+            
+            <h5 class="mb-3">Your Estimated Values:</h5>
+            
+            <!-- BMI Result -->
+            <div class="result-card {% if results.bmi < 18.5 %}result-blue{% elif results.bmi < 25 %}result-green{% elif results.bmi < 30 %}result-yellow{% else %}result-red{% endif %} mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><i class="fas fa-weight me-2"></i>BMI (Calculated Exactly)</strong>
+                        <div class="small text-muted">From your weight and height</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold fs-4">{{ results.bmi }}</span>
+                        <span class="badge bg-secondary ms-2">{{ results.bmi_category }}</span>
+                        <div class="small text-success">✅ 100% Accurate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BP Result -->
+            <div class="result-card {% if results.bp_detail.color == 'green' %}result-green{% elif results.bp_detail.color == 'yellow' %}result-yellow{% elif results.bp_detail.color == 'orange' %}result-orange{% else %}result-red{% endif %} mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><i class="fas fa-heartbeat me-2"></i>Blood Pressure (Estimated)</strong>
+                        <div class="small text-muted">Estimated from your daily routine</div>
+                        <div class="small text-warning">⚠️ Confidence: {{ results.bp_confidence }}% - Use BP monitor for exact reading</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold fs-4">{{ results.bp_sys }}/{{ results.bp_dias }}</span>
+                        <span class="small ms-1">mmHg</span>
+                        <div><span class="badge bg-warning text-dark">{{ results.bp_category }}</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Glucose Result -->
+            <div class="result-card {% if results.glucose_detail.color == 'green' %}result-green{% elif results.glucose_detail.color == 'orange' %}result-orange{% else %}result-red{% endif %} mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><i class="fas fa-tint me-2"></i>Blood Glucose (Estimated)</strong>
+                        <div class="small text-muted">Estimated from your diet & symptoms</div>
+                        <div class="small text-warning">⚠️ Use glucometer for accurate reading</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold fs-4">{{ results.glucose }}</span>
+                        <span class="small ms-1">mg/dL</span>
+                        <div><span class="badge bg-info">{{ results.glucose_category }}</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Disclaimer -->
+            <div class="disclaimer-box">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <strong>Important:</strong> {{ results.disclaimer }}
+            </div>
+            
+            <!-- NEXT STEP BUTTON -->
+            <form method="POST" action="/assess" id="autoFillForm" class="mt-4">
+                <!-- Auto-fill hidden fields for main assessment -->
+                <input type="hidden" name="bp_sys" value="{{ results.bp_sys }}">
+                <input type="hidden" name="bp_dias" value="{{ results.bp_dias }}">
+                <input type="hidden" name="bmi" value="{{ results.bmi }}">
+                <input type="hidden" name="glucose" value="{{ results.glucose }}">
+                <input type="hidden" name="bp_estimated" value="true">
+                <input type="hidden" name="glucose_estimated" value="true">
+                
+                <!-- Pass original form data -->
+                <input type="hidden" name="age" value="{{ form_data.age }}">
+                <input type="hidden" name="gender" value="{{ form_data.gender }}">
+                <input type="hidden" name="smoking" value="{{ form_data.smoking }}">
+                <input type="hidden" name="alcohol" value="{{ form_data.alcohol }}">
+                <input type="hidden" name="sleep_hours" value="{{ form_data.sleep_hours }}">
+                <input type="hidden" name="stress_level" value="{{ form_data.stress_level }}">
+                
+                <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius: 25px;">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    Proceed to Full Health Assessment →
+                </button>
+                <p class="text-center text-muted mt-2 small">
+                    Your calculated values will be auto-filled in the next form
+                </p>
+            </form>
+            
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+// Live BMI Calculator
+function calculateBMI() {
+    const weight = parseFloat(document.querySelector('[name="weight"]').value);
+    const height = parseFloat(document.querySelector('[name="height"]').value);
+    
+    if (weight > 0 && height > 0) {
+        const bmi = (weight / ((height/100) ** 2)).toFixed(1);
+        let category = '';
+        let colorClass = '';
+        
+        if (bmi < 18.5) {
+            category = 'Underweight';
+            colorClass = 'result-blue';
+        } else if (bmi < 25) {
+            category = 'Normal ✅';
+            colorClass = 'result-green';
+        } else if (bmi < 30) {
+            category = 'Overweight ⚠️';
+            colorClass = 'result-yellow';
+        } else {
+            category = 'Obese 🔴';
+            colorClass = 'result-red';
+        }
+        
+        const preview = document.getElementById('bmiPreview');
+        preview.style.display = 'block';
+        preview.className = `result-card ${colorClass}`;
+        document.getElementById('bmiValue').textContent = bmi;
+        document.getElementById('bmiCategory').textContent = category;
+    }
+}
+</script>
+
+</body>
+</html>

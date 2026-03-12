@@ -1,45 +1,32 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row justify-content-center animate-in">
-    <div class="col-lg-10">
-        <div class="text-center mb-5">
-            <h1 class="text-white-shadow">WHO Health Standards</h1>
-            <p class="text-white lead">Official guidelines from the World Health Organization for a healthy life.</p>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">WHO Health Standards</h1>
+        <p class="text-muted">Benchmarks for healthy living as per World Health Organization.</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="health-card h-100">
+                <h4 class="text-danger fw-bold">Blood Pressure</h4>
+                <table class="table table-borderless mt-3">
+                    <tr><td>Normal:</td><td class="text-success fw-bold">&lt; 120/80</td></tr>
+                    <tr><td>Elevated:</td><td class="text-warning fw-bold">120-129 / &lt;80</td></tr>
+                    <tr><td>Hypertension 1:</td><td class="text-danger fw-bold">130-139 / 80-89</td></tr>
+                </table>
+            </div>
         </div>
-
-        <div class="glass-card mb-4">
-            <h3 class="text-primary"><i class="fas fa-running me-2"></i>Physical Activity</h3>
-            <p><strong>Adults (18-64 years):</strong></p>
-            <ul>
-                <li>Should do at least 150–300 minutes of moderate-intensity aerobic physical activity.</li>
-                <li>Or at least 75–150 minutes of vigorous-intensity aerobic physical activity.</li>
-                <li>Muscle-strengthening activities at moderate or greater intensity that involve all major muscle
-                    groups on 2 or more days a week.</li>
-            </ul>
-        </div>
-
-        <div class="glass-card mb-4">
-            <h3 class="text-success"><i class="fas fa-carrot me-2"></i>Healthy Diet</h3>
-            <p><strong>Key facts:</strong></p>
-            <ul>
-                <li>Fruit, vegetables, legumes (e.g. lentils and beans), nuts and whole grains (e.g. unprocessed maize,
-                    millet, oats, wheat and brown rice).</li>
-                <li>At least 400 g (i.e. five portions) of fruit and vegetables per day.</li>
-                <li>Less than 10% of total energy intake from free sugars.</li>
-                <li>Less than 30% of total energy intake from fats.</li>
-                <li>Less than 5 g of salt (equivalent to about one teaspoon) per day.</li>
-            </ul>
-        </div>
-
-        <div class="glass-card mb-4">
-            <h3 class="text-info"><i class="fas fa-bed me-2"></i>Sleep Hygiene</h3>
-            <p><strong>Recommendations:</strong></p>
-            <ul>
-                <li>7-9 hours of good quality sleep on a regular schedule.</li>
-                <li>Avoid caffeine and heavy meals close to bedtime.</li>
-                <li>Limit exposure to bright light (screens) in the evenings.</li>
-            </ul>
+        <div class="col-md-6">
+            <div class="health-card h-100">
+                <h4 class="text-primary fw-bold">BMI Categories</h4>
+                <table class="table table-borderless mt-3">
+                    <tr><td>Underweight:</td><td>&lt; 18.5</td></tr>
+                    <tr><td>Normal:</td><td class="text-success fw-bold">18.5 - 24.9</td></tr>
+                    <tr><td>Overweight:</td><td class="text-warning fw-bold">25 - 29.9</td></tr>
+                    <tr><td>Obese:</td><td class="text-danger fw-bold">&gt; 30</td></tr>
+                </table>
+            </div>
         </div>
     </div>
 </div>

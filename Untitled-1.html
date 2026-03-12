@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Login</title>
+    <style>
+        /* --- CSS STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #f8f9fa; /* Softer background */
+        }
+
+        /* --- Left Side Bar: Guru (Swami Ramdas) --- */
+        .side-bar-left {
+            flex: 1; 
+            /* REPLACE 'guru.jpg' below with your actual image file or link */
+            background-image: url('https://placehold.co/600x1000/orange/white?text=Guru:+Swami+Ramdas'); 
+            background-size: cover;
+            background-position: center;
+            display: none; 
+            position: relative;
+        }
+
+        /* --- Right Side Bar: Yogi Ramsuratkumar --- */
+        .side-bar-right {
+            flex: 1; 
+            /* REPLACE 'yogi.jpg' below with your actual image file or link */
+            background-image: url('https://placehold.co/600x1000/orange/white?text=Yogi+Ramsuratkumar'); 
+            background-size: cover;
+            background-position: center;
+            display: none;
+        }
+
+        /* Overlay to make text readable if you add text over images later */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.1); 
+        }
+
+        /* Center Login Container */
+        .login-container {
+            flex: 1.2; /* Slightly narrower center for perfect ratio */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            box-shadow: 0 0 30px rgba(0,0,0,0.15); /* Stronger shadow for depth */
+            z-index: 10;
+        }
+
+        .login-box {
+            width: 85%;
+            max-width: 380px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Header Text */
+        .login-header h1 {
+            font-size: 2.2rem;
+            color: #d35400; /* Saffron/Orange color for spiritual feel */
+            margin-bottom: 10px;
+            font-weight: 400; 
+        }
+
+        .login-header p {
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 6px; 
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #d35400; /* Orange highlight */
+        }
+
+        /* Remember Me */
+        .remember-me-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .remember-me-container input {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            accent-color: #d35400;
+            cursor: pointer;
+        }
+
+        .remember-me-container label {
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+        }
+
+        /* Button styling */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #d35400; /* Saffron color */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .login-btn:hover {
+            background-color: #e67e22; /* Lighter orange */
+        }
+
+        /* Footer Test Text */
+        .footer-text {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #aaa;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        #error-msg {
+            color: #c0392b;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0; 
+            transition: opacity 0.3s;
+        }
+
+        /* Responsive Breakpoints */
+        @media (min-width: 768px) {
+            .side-bar-left, .side-bar-right {
+                display: block; 
+            }
+        }
+    </style>
+</head>
+<body onclick="startMusic()"> 
+
+    <div class="side-bar-left">
+        <div class="overlay"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Divine Connect</h1>
+                <p>Enter your credentials to proceed</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+                <div class="input-group">
+                    <label for="username">User ID</label>
+                    <input type="text" id="username" placeholder="admin" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="1234" required>
+                </div>
+
+                <div class="remember-me-container">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                </div>
+
+                <button type="submit" class="login-btn">Login</button>
+                <p id="error-msg">Incorrect User ID or Password</p>
+            </form>
+
+            <div class="footer-text">
+                <p>Authorized Access Only • Divine Project v1.0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-bar-right">
+        <div class="overlay"></div>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="chanting.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 1. Configuration
+        const DEFAULT_USER = "admin";
+        const DEFAULT_PASS = "1234";
+        const NEXT_PAGE_LINK = "main_project.html"; 
+
+        // 2. On Load: Check Local Storage
+        window.onload = function() {
+            const savedUser = localStorage.getItem('savedUsername');
+            const rememberCheckbox = document.getElementById('rememberMe');
+            const usernameInput = document.getElementById('username');
+
+            if (savedUser) {
+                usernameInput.value = savedUser;
+                rememberCheckbox.checked = true;
+            }
+        };
+
+        // 3. Login Logic
+        function handleLogin(event) {
+            event.preventDefault(); 
+
+            const userInput = document.getElementById('username');
+            const passInput = document.getElementById('password');
+            const rememberCheckbox = document.getElementById('rememberMe');
+            const errorMsg = document.getElementById('error-msg');
+
+            if (userInput.value === DEFAULT_USER && passInput.value === DEFAULT_PASS) {
+                // Save or Clear 'Remember Me'
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('savedUsername', userInput.value);
+                } else {
+                    localStorage.removeItem('savedUsername');
+                }
+                // Redirect
+                window.location.href = NEXT_PAGE_LINK;
+            } else {
+                // Show Error
+                errorMsg.style.opacity = "1";
+                const btn = document.querySelector('.login-btn');
+                btn.style.backgroundColor = "#c0392b"; // Red for error
+                setTimeout(() => {
+                    btn.style.backgroundColor = "#d35400"; // Reset to Orange
+                    errorMsg.style.opacity = "0";
+                }, 2000);
+            }
+        }
+
+        // 4. Music Logic (Auto-play workaround)
+        // Music attempts to play when the user clicks anywhere on the page
+        function startMusic() {
+            const music = document.getElementById('bgMusic');
+            if (music.paused) {
+                music.volume = 0.6; 
+                music.play().catch(error => {
+                    console.log("Audio waiting for user interaction.");
+                });
+            }
+        }
+    </script>
+</body>
+</html>

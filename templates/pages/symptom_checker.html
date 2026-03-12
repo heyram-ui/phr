@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="text-center mb-5 fade-in-up">
+                <span class="badge bg-primary-soft text-primary fw-bold mb-2">AI DIAGNOSTICS</span>
+                <h1 class="fw-bold display-5">Symptom Checker</h1>
+                <p class="text-muted">Select all the symptoms you are experiencing to find a match.</p>
+            </div>
+
+            <form method="POST" class="health-card p-5 mb-5 fade-in-up delay-1">
+                <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">
+                    <i class="fas fa-stethoscope me-2 text-danger"></i>Select Symptoms
+                </h5>
+                
+                <div class="symptom-grid">
+                    {% for symptom in symptoms %}
+                    <div class="symptom-item">
+                        <input type="checkbox" class="btn-check" id="sym_{{loop.index}}" name="symptoms" value="{{symptom}}">
+                        <label class="btn btn-outline-dark symptom-label w-100" for="sym_{{loop.index}}">
+                            {{ symptom }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary-modern btn-lg shadow-lg px-5 rounded-pill">
+                        <i class="fas fa-search me-2"></i>Analyze Condition
+                    </button>
+                </div>
+            </form>
+
+            {% if diagnosis %}
+            <div class="health-card border-success bg-white shadow-lg fade-in-up" style="border-left: 8px solid #10b981;">
+                <div class="p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-success text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-uppercase text-muted fw-bold small mb-1">Diagnosis Result</h6>
+                            <h2 class="fw-bold text-success mb-0">{{ diagnosis.name }}</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded-3">
+                        <h5 class="fw-bold mb-3">Recommended Recovery Protocol:</h5>
+                        <div class="row g-3">
+                            {% for phase, action in diagnosis.plan.items() %}
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <div class="badge bg-dark mb-2">{{ phase }}</div>
+                                        <p class="small text-muted mb-0">{{ action }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <a href="/tracker" class="btn btn-success rounded-pill fw-bold px-4">
+                            Start Tracking Recovery <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Auto-fit columns */
+        gap: 15px;
+    }
+    
+    .symptom-label {
+        border-radius: 50px;
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        transition: all 0.2s;
+        text-transform: capitalize;
+    }
+
+    .btn-check:checked + .symptom-label {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+</style>
+{% endblock %}

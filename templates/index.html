@@ -1,58 +1,407 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>HealthPredict Pro</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">🏥 HealthPredict Pro</a>
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .status-high    { background: #ffe5e5; }
+    .status-medium  { background: #fff8e1; }
+    .status-low     { background: #e3fcec; }
+    .text-high      { color: #dc3545 !important; }
+    .text-medium    { color: #fd7e14 !important; }
+    .text-low       { color: #28a745 !important; }
+    .icon-high      { color: #dc3545; }
+    .icon-medium    { color: #fd7e14; }
+    .icon-low       { color: #28a745; }
+    .animate-in     { animation: fadeInUp 0.4s ease; }
+    @keyframes fadeInUp {
+        from { opacity:0; transform:translateY(20px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .stat-card {
+        border:none; border-radius:16px;
+        transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform:translateY(-4px);
+        box-shadow:0 8px 25px rgba(0,0,0,0.12) !important;
+    }
+    .quick-card {
+        border:none; border-radius:16px;
+        transition:transform 0.2s, box-shadow 0.2s;
+        border-top:4px solid transparent !important;
+    }
+    .quick-card:hover {
+        transform:translateY(-4px);
+        box-shadow:0 8px 25px rgba(0,0,0,0.12) !important;
+    }
+    .quick-card-heart        { border-top-color:#0d6efd !important; }
+    .quick-card-symptom      { border-top-color:#dc3545 !important; }
+    .quick-card-encyclopedia { border-top-color:#28a745 !important; }
+    .chart-wrapper  { position:relative; height:350px; width:100%; }
+    .recovery-banner {
+        background:linear-gradient(45deg,#4e73df,#224abe);
+        border-radius:16px;
+    }
+    .insight-banner {
+        border-left:5px solid #17a2b8 !important;
+        border-radius:12px;
+    }
+</style>
+
+<div class="container-fluid animate-in p-4">
+
+    <!-- ══ TOP HEADER ══ -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="display-5 fw-bold text-dark mb-1">Dashboard</h2>
+            <p class="text-muted mb-0">Track your progress and follow your path to recovery.</p>
         </div>
-    </nav>
-    
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-body text-center">
-                        <h2 class="mb-4">Predict Your Health Risks</h2>
-                        <p class="mb-4">Using Machine Learning to analyze your daily routines</p>
-                        
-                        <form method="POST" action="/predict">
-                            <div class="mb-3">
-                                <label class="form-label">Sleep Hours</label>
-                                <input type="number" step="0.1" class="form-control" name="sleep_hours" value="7" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Daily Steps</label>
-                                <input type="number" class="form-control" name="steps" value="5000" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Heart Rate</label>
-                                <input type="number" class="form-control" name="heart_rate" value="72" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Stress Level (1-10)</label>
-                                <input type="number" min="1" max="10" class="form-control" name="stress_level" value="5" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">Predict Health Risk</button>
-                        </form>
-                        
-                        <hr class="my-4">
-                        
-                        <div class="d-grid gap-2">
-                            <a href="/login" class="btn btn-outline-primary">Login</a>
-                            <a href="/register" class="btn btn-success">Register</a>
-                        </div>
+        <div class="col-md-6 text-end d-flex flex-wrap justify-content-end gap-2">
+            <button class="btn btn-warning rounded-pill"
+                    data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                <i class="fas fa-star me-1"></i>Rate Us
+            </button>
+            <a href="/encyclopedia" class="btn btn-outline-primary rounded-pill">
+                <i class="fas fa-book-medical me-1"></i>Encyclopedia
+            </a>
+            <a href="/profile" class="btn btn-outline-secondary rounded-pill">
+                <i class="fas fa-user-circle me-1"></i>My Profile
+            </a>
+            <a href="/assess" class="btn btn-success rounded-pill">
+                <i class="fas fa-heartbeat me-1"></i>Heart Risk
+            </a>
+            <!-- ✅ FIX 3: Changed link to /symptom-checker -->
+            <a href="/symptom-checker" class="btn btn-danger rounded-pill">
+                <i class="fas fa-stethoscope me-1"></i>Symptoms Checker
+            </a>
+            <a href="/assess" class="btn btn-primary rounded-pill shadow-sm">
+                <i class="fas fa-plus me-1"></i>New Checkup
+            </a>
+        </div>
+    </div>
+
+    <!-- ══ AI INSIGHT BANNER ══ -->
+    {% if recovery and recovery.insight %}
+    <div class="card mb-4 bg-light shadow-sm insight-banner">
+        <div class="card-body d-flex align-items-center py-3">
+            <div class="me-4 text-info"><i class="fas fa-brain fa-3x"></i></div>
+            <div>
+                <h5 class="text-info mb-1 fw-bold">
+                    <i class="fas fa-robot me-2"></i>AI Root Cause Analysis
+                </h5>
+                <p class="mb-0 lead text-dark">{{ recovery.insight }}</p>
+                <small class="text-muted">Insight based on your Sleep, Stress, and BMI patterns.</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ══ STATS ROW ══ -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-4 h-100 shadow-sm">
+                <i class="fas fa-heartbeat fa-2x text-primary mb-3"></i>
+                <h6 class="text-muted text-uppercase fw-bold" style="font-size:11px;letter-spacing:1px;">
+                    Health Score
+                </h6>
+                <h1 class="display-3 fw-bold text-primary mb-0">
+                    {{ avg_score | round | int if avg_score else 0 }}
+                </h1>
+                <small class="text-muted">out of 100</small>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-4 h-100 shadow-sm">
+                <i class="fas fa-clipboard-check fa-2x text-success mb-3"></i>
+                <h6 class="text-muted text-uppercase fw-bold" style="font-size:11px;letter-spacing:1px;">
+                    Assessments
+                </h6>
+                <h1 class="display-3 fw-bold text-dark mb-0">
+                    {{ total_assessments if total_assessments else 0 }}
+                </h1>
+                <small class="text-muted">total checkups</small>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-4 h-100 shadow-sm">
+                <i class="fas fa-virus fa-2x text-danger mb-3"></i>
+                <h6 class="text-muted text-uppercase fw-bold" style="font-size:11px;letter-spacing:1px;">
+                    Risk Conditions
+                </h6>
+                <h1 class="display-3 fw-bold text-danger mb-0">
+                    {{ disease_count if disease_count else 0 }}
+                </h1>
+                <small class="text-muted">diseases detected</small>
+            </div>
+        </div>
+
+        <!-- Current Status — no Jinja2 inside style="" -->
+        <div class="col-md-3">
+            {% if last_risk == 'High' %}
+                {% set s_bg   = 'status-high'  %}
+                {% set s_text = 'text-high'    %}
+                {% set s_icon = 'fa-exclamation-circle icon-high' %}
+            {% elif last_risk == 'Medium' %}
+                {% set s_bg   = 'status-medium' %}
+                {% set s_text = 'text-medium'   %}
+                {% set s_icon = 'fa-exclamation-triangle icon-medium' %}
+            {% else %}
+                {% set s_bg   = 'status-low'  %}
+                {% set s_text = 'text-low'    %}
+                {% set s_icon = 'fa-check-circle icon-low' %}
+            {% endif %}
+            <div class="card stat-card p-4 h-100 shadow-sm d-flex flex-row align-items-center justify-content-between {{ s_bg }}">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-bold" style="font-size:11px;letter-spacing:1px;">
+                        Current Status
+                    </h6>
+                    <h2 class="mb-1 fw-bold {{ s_text }}">
+                        {% if last_risk %}{{ last_risk }} Risk{% else %}No Data{% endif %}
+                    </h2>
+                    <small class="text-muted">Latest prediction</small>
+                </div>
+                <i class="fas {{ s_icon }} fa-4x opacity-25"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ QUICK ACTION CARDS ══ -->
+    <div class="row g-4 mb-4">
+
+        <!-- Heart Risk Card -->
+        <div class="col-md-4">
+            <div class="card quick-card quick-card-heart h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-heart fa-3x text-primary mb-3"></i>
+                    <h5 class="fw-bold">Heart and Diabetes Risk</h5>
+                    <p class="text-muted small">
+                        Check your risk using ML model trained on your health data.
+                    </p>
+                    <a href="/assess" class="btn btn-primary rounded-pill w-100">
+                        <i class="fas fa-heartbeat me-2"></i>Check Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ FIX 4: Symptoms Checker card — was "64 Disease Analysis" with wrong link -->
+        <div class="col-md-4">
+            <div class="card quick-card quick-card-symptom h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-stethoscope fa-3x text-danger mb-3"></i>
+                    <h5 class="fw-bold">Symptoms Checker</h5>
+                    <p class="text-muted small">
+                        Select your symptoms and find matching diseases with recommendations.
+                    </p>
+                    <a href="/symptom-checker" class="btn btn-danger rounded-pill w-100">
+                        <i class="fas fa-search me-2"></i>Check Symptoms
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Encyclopedia Card -->
+        <div class="col-md-4">
+            <div class="card quick-card quick-card-encyclopedia h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-book-medical fa-3x text-success mb-3"></i>
+                    <h5 class="fw-bold">Disease Encyclopedia</h5>
+                    <p class="text-muted small">
+                        Browse and learn about diseases, symptoms and prevention.
+                    </p>
+                    <a href="/encyclopedia" class="btn btn-success rounded-pill w-100">
+                        <i class="fas fa-book me-2"></i>Browse
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ HEALTH TREND CHART ══ -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0" style="border-radius:16px;">
+                <div class="card-header bg-white pt-4 pb-0 border-0 d-flex justify-content-between align-items-center"
+                     style="border-radius:16px 16px 0 0;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Health Score Trend
+                    </h4>
+                    <span class="badge bg-light text-dark border">Last 10 Checkups</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-wrapper">
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- ══ RECOVERY PLAN ══ -->
+    {% if recovery %}
+    <div class="card mb-4 border-0 shadow-lg recovery-banner text-white">
+        <div class="card-body p-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="fw-bold mb-2">
+                        <i class="fas fa-leaf me-2"></i>Recommended Recovery Path
+                    </h3>
+                    <p class="lead mb-3">Focus Area: <strong>{{ recovery.issue }}</strong></p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-light text-primary rounded-pill shadow-sm"
+                                type="button" data-bs-toggle="collapse" data-bs-target="#yogaHero">
+                            <i class="fas fa-om me-2"></i>Yoga Plan
+                        </button>
+                        <button class="btn btn-light text-danger rounded-pill shadow-sm"
+                                type="button" data-bs-toggle="collapse" data-bs-target="#dietHero">
+                            <i class="fas fa-apple-alt me-2"></i>Diet Plan
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center d-none d-md-block">
+                    <i class="fas fa-spa fa-6x opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="collapse mb-4" id="yogaHero">
+        <div class="card card-body shadow-sm border-0" style="border-radius:12px;">
+            <h5 class="text-primary mb-3"><i class="fas fa-om me-2"></i>Yoga Routine</h5>
+            <ul class="mb-0">
+                {% for item in recovery.yoga %}
+                <li class="mb-2">{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="collapse mb-5" id="dietHero">
+        <div class="card card-body shadow-sm border-0" style="border-radius:12px;">
+            <h5 class="text-danger mb-3"><i class="fas fa-apple-alt me-2"></i>Dietary Guidelines</h5>
+            <ul class="mb-0">
+                {% for item in recovery.diet %}
+                <li class="mb-2">{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ✅ Chart data via data attributes — no Jinja2 inside script tags -->
+<div id="chart-data"
+     data-dates="{{ dates  | tojson | safe }}"
+     data-scores="{{ scores | tojson | safe }}"
+     style="display:none;"></div>
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var ctx = document.getElementById('trendChart');
+    if (!ctx) return;
+
+    /* Read data from HTML attributes — avoids Jinja2 inside JS (VS Code linter fix) */
+    var chartDataEl = document.getElementById('chart-data');
+    var chartDates  = JSON.parse(chartDataEl.getAttribute('data-dates')  || '[]');
+    var chartScores = JSON.parse(chartDataEl.getAttribute('data-scores') || '[]');
+
+    /* Fallback if empty */
+    if (!chartDates  || chartDates.length  === 0) chartDates  = ['No Data'];
+    if (!chartScores || chartScores.length === 0) chartScores = [0];
+
+    new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: chartDates,
+            datasets: [{
+                label: 'Health Score',
+                data: chartScores,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.08)',
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#4e73df',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a1a2e',
+                    titleColor: '#ffffff',
+                    bodyColor: '#cccccc',
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return '  Health Score: ' + context.parsed.y + ' / 100';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: {
+                        callback: function(value) { return value + '/100'; }
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
+
+<!-- FEEDBACK MODAL -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="feedbackLabel">
+                    <i class="fas fa-star text-warning me-2"></i>Rate Your Experience
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/submit-feedback" method="POST">
+                <div class="modal-body pt-3">
+                    <label class="form-label fw-bold">Rating</label>
+                    <select name="rating" class="form-select mb-3">
+                        <option value="5">5 Star — Excellent</option>
+                        <option value="4">4 Star — Very Good</option>
+                        <option value="3">3 Star — Good</option>
+                        <option value="2">2 Star — Fair</option>
+                        <option value="1">1 Star — Poor</option>
+                    </select>
+                    <label class="form-label fw-bold">Comment</label>
+                    <textarea name="comment" class="form-control" rows="3"
+                              placeholder="Tell us how we can improve..."></textarea>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-pill"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-paper-plane me-2"></i>Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -12,8 +12,16 @@
                         placeholder="name@example.com">
                 </div>
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Password</label>
-                    <input type="password" name="password" class="form-control form-glass" required>
+                    <div class="d-flex justify-content-between">
+                        <label class="form-label ms-1">Password</label>
+                        <a href="/forgot-password" class="text-decoration-none small text-primary">Forgot Password?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text glass-input border-0"><i
+                                class="fas fa-lock text-primary"></i></span>
+                        <input type="password" name="password" class="form-control glass-input border-0"
+                            placeholder="••••••••" required>
+                    </div>
                 </div>
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary-glass btn-lg">Sign In</button>

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        
+        <div class="col-lg-4">
+            <div class="health-card bg-primary text-white h-100 position-relative overflow-hidden">
+                <h4 class="fw-bold mb-1">Recovery Plan</h4>
+                <p class="opacity-75 mb-4">Focus: {{ disease }}</p>
+                
+                <div class="vstack gap-3">
+                    {% for phase, action in plan.items() %}
+                    <div class="bg-white bg-opacity-10 p-3 rounded-3 border border-white border-opacity-25">
+                        <small class="text-warning fw-bold text-uppercase">{{ phase }}</small>
+                        <p class="mb-0 small mt-1">{{ action }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="health-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Today's Log</h5>
+                    <span class="badge bg-light text-dark">{{ date }}</span>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">DIET QUALITY (1-5)</label>
+                        <div class="d-flex justify-content-between px-2">
+                            <span class="small">Cheat Day</span>
+                            <span class="small">Perfect</span>
+                        </div>
+                        <input type="range" class="form-range" min="1" max="5" name="diet" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">EXERCISE (MINUTES)</label>
+                        <input type="number" class="form-control" name="exercise" placeholder="e.g. 30" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">PAIN/SYMPTOM SEVERITY (1-10)</label>
+                        <select class="form-select" name="severity">
+                            <option value="1">1 - Feeling Great</option>
+                            <option value="3">3 - Mild Discomfort</option>
+                            <option value="5">5 - Moderate Pain</option>
+                            <option value="8">8 - Severe</option>
+                            <option value="10">10 - Unbearable</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">DAILY NOTES</label>
+                        <textarea class="form-control" name="notes" rows="2" placeholder="How do you feel today?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold">
+                        <i class="fas fa-save me-2"></i>Save Daily Progress
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="health-card h-100 text-center">
+                <h6 class="text-muted fw-bold mb-3">Symptom Trend</h6>
+                <div style="height: 200px;">
+                    <canvas id="trackerChart"></canvas>
+                </div>
+                <small class="text-muted d-block mt-3">Goal: Keep the line going down!</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('trackerChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ dates|tojson|safe }},
+            datasets: [{
+                label: 'Pain Level',
+                data: {{ severity|tojson|safe }},
+                backgroundColor: '#ef4444',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, max: 10 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+{% endblock %}

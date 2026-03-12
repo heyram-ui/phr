@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        
+        <div class="col-lg-4">
+            <div class="health-card text-center h-100">
+                <div class="avatar-circle mb-3 mx-auto">
+                    {{ user[1][0] if user else 'U' }}
+                </div>
+                <h3 class="fw-bold">{{ user[1] if user else 'Guest User' }}</h3>
+                <p class="text-muted">{{ user[2] if user else 'No Email' }}</p>
+                <hr class="opacity-10 my-4">
+                
+                <div class="text-start px-3">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold text-muted">Age</span>
+                        <span class="fw-bold">{{ user[4] if user else 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold text-muted">Emergency</span>
+                        <span class="fw-bold text-danger">{{ user[5] if user else 'Not Set' }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 d-grid gap-2">
+                    <a href="/logout" class="btn btn-danger btn-pill">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="health-card h-100 p-0 overflow-hidden d-flex flex-column">
+                <div class="p-4 border-bottom bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-map-marked-alt text-primary me-2"></i>Medical Map</h5>
+                    <button class="btn btn-sm btn-primary-modern" onclick="initMap()">
+                        <i class="fas fa-location-arrow me-2"></i>Find Hospitals
+                    </button>
+                </div>
+                
+                <div id="mapStatus" class="bg-light px-4 py-2 small text-muted border-bottom">
+                    <i class="fas fa-info-circle me-1"></i> Press "Find Hospitals" to locate services.
+                </div>
+
+                <div id="map" style="height: 500px; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script 
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places&callback=initMap" 
+    async defer>
+</script>
+
+<script>
+    let map;
+    let service;
+    let infowindow;
+
+    function initMap() {
+        if (navigator.geolocation) {
+            document.getElementById('mapStatus').innerHTML = '<span class="text-primary fw-bold">Locating you...</span>';
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userPos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+
+                    map = new google.maps.Map(document.getElementById("map"), {
+                        center: userPos,
+                        zoom: 14,
+                        mapId: "DEMO_MAP_ID"
+                    });
+
+                    new google.maps.Marker({
+                        position: userPos,
+                        map: map,
+                        title: "You are here",
+                        icon: "http://googleusercontent.com/maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                    });
+
+                    document.getElementById('mapStatus').innerHTML = '✅ Location Found. Searching for hospitals...';
+                    findHospitals(userPos);
+                },
+                () => {
+                    handleLocationError(true, map.getCenter());
+                }
+            );
+        } else {
+            handleLocationError(false, map.getCenter());
+        }
+    }
+
+    function findHospitals(location) {
+        const request = {
+            location: location,
+            radius: '5000', // 5km
+            type: ['hospital']
+        };
+
+        service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                document.getElementById('mapStatus').innerHTML = `✅ Found ${results.length} hospitals nearby.`;
+                for (let i = 0; i < results.length; i++) {
+                    createMarker(results[i]);
+                }
+            } else {
+                document.getElementById('mapStatus').innerHTML = '⚠️ No hospitals found nearby.';
+            }
+        });
+    }
+
+    function createMarker(place) {
+        if (!place.geometry || !place.geometry.location) return;
+
+        const marker = new google.maps.Marker({
+            map,
+            position: place.geometry.location,
+            title: place.name
+        });
+
+        const infowindow = new google.maps.InfoWindow();
+
+        marker.addListener("click", () => {
+            infowindow.setContent(`
+                <div style="padding:5px;">
+                    <strong>${place.name}</strong><br>
+                    <small>${place.vicinity}</small><br>
+                    <small>Rating: ${place.rating || 'N/A'} ⭐</small>
+                </div>
+            `);
+            infowindow.open(map, marker);
+        });
+    }
+
+    function handleLocationError(browserHasGeolocation, pos) {
+        const info = browserHasGeolocation
+            ? "Error: The Geolocation service failed."
+            : "Error: Your browser doesn't support geolocation.";
+        document.getElementById('mapStatus').innerHTML = `<span class="text-danger">${info}</span>`;
+    }
+</script>
+{% endblock %}

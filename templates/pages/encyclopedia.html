@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5 fade-in-up">
+        <h6 class="text-primary fw-bold text-uppercase">Medical Database</h6>
+        <h1 class="fw-bold display-5">Health Encyclopedia</h1>
+        <p class="text-muted">Explore symptoms, risks, and recovery plans.</p>
+    </div>
+
+    <div class="row g-4">
+        {% for name, data in diseases.items() %}
+        <div class="col-md-6 col-lg-4 fade-in-up delay-1">
+            <div class="health-card h-100 hover-card">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-{{ data.color }}-soft text-{{ data.color }} rounded-circle p-3 me-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas {{ data.icon }} fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ data.title }}</h5>
+                        <small class="text-muted">Medical Condition</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong class="text-dark d-block mb-2">⚠️ Common Symptoms:</strong>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for symptom in data.symptoms %}
+                            <span class="badge bg-light text-dark border">{{ symptom }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong class="text-dark d-block mb-1">🛑 The Struggle:</strong>
+                    <p class="small text-muted mb-0">{{ data.struggle }}</p>
+                </div>
+
+                <button class="btn btn-outline-{{ data.color }} btn-sm w-100 rounded-pill mt-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                    View Recovery Plan <i class="fas fa-chevron-down ms-1"></i>
+                </button>
+
+                <div class="collapse mt-3" id="collapse{{ loop.index }}">
+                    <div class="card card-body bg-light border-0 small">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-pray me-2"></i>Yoga Therapy</h6>
+                        <ul class="ps-3 mb-2">
+                            {% for yoga in data.recovery.yoga %}
+                                <li>{{ yoga.name }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <h6 class="fw-bold text-success mt-2"><i class="fas fa-carrot me-2"></i>Diet Plan</h6>
+                        <div>
+                            {% for food in data.recovery.diet.good %}
+                                <span class="badge bg-success-soft text-success border border-success mb-1">{{ food }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .bg-danger-soft { background: #fee2e2; color: #b91c1c; }
+    .bg-warning-soft { background: #fef3c7; color: #b45309; }
+    .bg-primary-soft { background: #e0e7ff; color: #4338ca; }
+</style>
+{% endblock %}

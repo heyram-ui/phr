@@ -1,85 +1,191 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row justify-content-center animate-in">
-    <div class="col-lg-8">
-        <h2 class="text-white-shadow text-center mb-5">Health Calculators</h2>
+<style>
+.hero{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;padding:36px 0 24px;}
+.fc{background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.07);padding:28px;margin-bottom:20px;border-left:5px solid #0d6e6e;}
+.fc h5{font-weight:700;color:#1e3a5f;margin-bottom:16px;}
+.form-label{font-weight:600;color:#333;}
+.form-control,.form-select{border:2px solid #e0e0e0;border-radius:10px;padding:10px 14px;}
+.form-control:focus,.form-select:focus{border-color:#0d6e6e;box-shadow:0 0 0 3px rgba(13,110,110,0.1);}
+.sbtn{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;border:none;padding:16px 40px;border-radius:50px;font-size:17px;font-weight:700;width:100%;cursor:pointer;}
+.sbtn:hover{transform:translateY(-2px);}
+.rc{border-radius:14px;padding:20px;border:2px solid;margin-bottom:14px;}
+.rc.g{background:#f0fff4;border-color:#27ae60;}
+.rc.o{background:#fffbf0;border-color:#f39c12;}
+.rc.r{background:#fff5f5;border-color:#e74c3c;}
+.rc.b{background:#f0f8ff;border-color:#3498db;}
+.rv{font-size:44px;font-weight:900;line-height:1;}
+.rbadge{display:inline-block;padding:5px 16px;border-radius:50px;font-weight:700;font-size:13px;color:white;margin-top:8px;}
+.livebmi{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;border-radius:12px;padding:14px 20px;text-align:center;margin-top:10px;}
+.hint{font-size:12px;color:#888;margin-top:3px;}
+.gotobtn{background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;border:none;padding:18px 40px;border-radius:50px;font-size:18px;font-weight:700;width:100%;text-align:center;text-decoration:none;display:block;box-shadow:0 8px 24px rgba(13,110,110,0.3);margin-bottom:12px;}
+.gotobtn:hover{transform:translateY(-2px);color:white;}
+</style>
 
-        <!-- BMI Calculator -->
-        <div class="glass-card mb-4">
-            <h4 class="text-primary mb-3"><i class="fas fa-weight me-2"></i>BMI Calculator</h4>
-            <div class="row">
-                <div class="col-md-4">
-                    <label class="form-label">Weight (kg)</label>
-                    <input type="number" id="weight" class="form-control form-glass" placeholder="70">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Height (cm)</label>
-                    <input type="number" id="height" class="form-control form-glass" placeholder="175">
-                </div>
-                <div class="col-md-4 d-grid align-items-end">
-                    <button onclick="calculateBMI()" class="btn btn-primary-glass">Calculate</button>
-                </div>
-            </div>
-            <div id="bmiResult" class="mt-3 text-center fw-bold" style="display:none;"></div>
-        </div>
+<div class="hero">
+  <div class="container">
+    <h2 class="fw-bold mb-1">🩺 Pre-Checkup Calculator</h2>
+    <p class="mb-0" style="opacity:0.85">Calculate BMI, BP and Glucose — then auto-fill your Health Assessment.</p>
+  </div>
+</div>
 
-        <!-- BP Chart -->
-        <div class="glass-card">
-            <h4 class="text-danger mb-3"><i class="fas fa-heartbeat me-2"></i>Blood Pressure Guide</h4>
-            <table class="table text-dark">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Systolic (Upper)</th>
-                        <th>Diastolic (Lower)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="table-success">
-                        <td>Normal</td>
-                        <td>Less than 120</td>
-                        <td>Less than 80</td>
-                    </tr>
-                    <tr class="table-warning">
-                        <td>Elevated</td>
-                        <td>120 - 129</td>
-                        <td>Less than 80</td>
-                    </tr>
-                    <tr class="table-danger">
-                        <td>High BP (Stage 1)</td>
-                        <td>130 - 139</td>
-                        <td>80 - 89</td>
-                    </tr>
-                    <tr class="bg-danger text-white">
-                        <td>Hypertensive Crisis</td>
-                        <td>Higher than 180</td>
-                        <td>Higher than 120</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+<div class="container py-4">
+
+{% if calculated and result %}
+<!-- ══ RESULTS ══════════════════════════════════════════════ -->
+<div style="background:linear-gradient(135deg,#e8f5e9,#e3f2fd);border:2px solid #27ae60;border-radius:14px;padding:18px 22px;margin-bottom:20px;">
+  <h6 class="fw-bold text-success mb-1">✅ Calculations Complete!</h6>
+  <p class="mb-0 text-muted small">Results saved. Click the button below — all values auto-fill in your Health Assessment.</p>
+</div>
+
+<div class="row g-3 mb-4">
+
+  <!-- BMI -->
+  <div class="col-md-4">
+    {% if result.bmi_cat=='Normal' %}{% set c='g' %}{% set col='#27ae60' %}
+    {% elif result.bmi_cat=='Overweight' %}{% set c='o' %}{% set col='#f39c12' %}
+    {% elif result.bmi_cat=='Obese' %}{% set c='r' %}{% set col='#e74c3c' %}
+    {% else %}{% set c='b' %}{% set col='#3498db' %}{% endif %}
+    <div class="rc {{c}}">
+      <div class="d-flex justify-content-between"><small class="fw-bold text-muted">BODY MASS INDEX</small><span style="font-size:26px">⚖️</span></div>
+      <div class="rv" style="color:{{col}}">{{result.bmi}}</div>
+      <div><span class="rbadge" style="background:{{col}}">{{result.bmi_cat}}</span></div>
+      <div class="hint mt-2">{{result.height}}cm &nbsp;|&nbsp; {{result.weight}}kg</div>
     </div>
+  </div>
+
+  <!-- BP -->
+  <div class="col-md-4">
+    {% if 'Normal' in result.bp_cat %}{% set c='g' %}{% set col='#27ae60' %}
+    {% elif 'High' in result.bp_cat or 'Stage 2' in result.bp_cat %}{% set c='r' %}{% set col='#e74c3c' %}
+    {% else %}{% set c='o' %}{% set col='#f39c12' %}{% endif %}
+    <div class="rc {{c}}">
+      <div class="d-flex justify-content-between"><small class="fw-bold text-muted">BLOOD PRESSURE</small><span style="font-size:26px">❤️</span></div>
+      <div class="rv" style="color:{{col}}">{{result.bp_sys}}<span style="font-size:18px;font-weight:400">/{{result.bp_dias}}</span></div>
+      <div class="hint">mmHg</div>
+      <div><span class="rbadge" style="background:{{col}}">{{result.bp_cat}}</span></div>
+    </div>
+  </div>
+
+  <!-- Glucose -->
+  <div class="col-md-4">
+    {% if result.glucose_cat=='Normal' %}{% set c='g' %}{% set col='#27ae60' %}
+    {% elif result.glucose_cat=='Not Provided' %}{% set c='b' %}{% set col='#3498db' %}
+    {% elif result.glucose_cat=='Pre-Diabetic' %}{% set c='o' %}{% set col='#f39c12' %}
+    {% else %}{% set c='r' %}{% set col='#e74c3c' %}{% endif %}
+    <div class="rc {{c}}">
+      <div class="d-flex justify-content-between"><small class="fw-bold text-muted">BLOOD GLUCOSE</small><span style="font-size:26px">🩸</span></div>
+      {% if result.glucose > 0 %}
+      <div class="rv" style="color:{{col}}">{{result.glucose}}</div>
+      <div class="hint">mg/dL fasting</div>
+      {% else %}
+      <div style="font-size:22px;font-weight:700;color:#999;padding:6px 0">Not entered</div>
+      {% endif %}
+      <div><span class="rbadge" style="background:{{col}}">{{result.glucose_cat}}</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary row -->
+<div class="fc mb-4">
+  <div class="row text-center g-2">
+    <div class="col-6 col-md-3"><div class="text-muted small fw-bold">AGE</div><div class="fw-bold fs-5">{{result.age}} yrs</div></div>
+    <div class="col-6 col-md-3"><div class="text-muted small fw-bold">SLEEP</div><div class="fw-bold fs-5">{{result.sleep_hours}} hrs</div></div>
+    <div class="col-6 col-md-3"><div class="text-muted small fw-bold">EXERCISE</div><div class="fw-bold fs-5">{{result.activity_mins}} min</div></div>
+    <div class="col-6 col-md-3"><div class="text-muted small fw-bold">STRESS</div><div class="fw-bold fs-5">{{result.stress}}/10</div></div>
+  </div>
+</div>
+
+<a href="/assess" class="gotobtn">🚀 Go to Health Assessment — All Values Auto-Filled →</a>
+<div class="text-center mb-4"><a href="/calculators" class="text-muted text-decoration-none small">← Recalculate</a></div>
+
+{% else %}
+<!-- ══ FORM ══════════════════════════════════════════════════ -->
+<div class="row justify-content-center"><div class="col-lg-7">
+<form method="POST" action="/calculators">
+
+  <div class="fc">
+    <h5><span style="background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-right:8px;">1</span>Basic Info</h5>
+    <div class="row g-3">
+      <div class="col-4"><label class="form-label">Age</label><input type="number" name="age" class="form-control" min="10" max="100" placeholder="28" required></div>
+      <div class="col-4"><label class="form-label">Weight (kg)</label><input type="number" name="weight" id="wt" class="form-control" step="0.1" placeholder="70" required oninput="lbmi()"></div>
+      <div class="col-4"><label class="form-label">Height (cm)</label><input type="number" name="height" id="ht" class="form-control" step="0.1" placeholder="170" required oninput="lbmi()"></div>
+      <div class="col-12" id="bmiLive" style="display:none">
+        <div class="livebmi"><strong>Live BMI: </strong><span id="lbv" class="fw-bold fs-5">—</span> <span id="lbc" class="opacity-75 ms-2"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc">
+    <h5><span style="background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-right:8px;">2</span>Blood Glucose <small class="text-muted fw-normal">(optional)</small></h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Fasting Glucose (mg/dL)</label>
+        <input type="number" name="glucose" id="gi" class="form-control" step="0.1" min="40" max="600" placeholder="Leave blank if unknown" oninput="ginfo()">
+      </div>
+      <div class="col-md-6">
+        <div id="gbox" style="background:#f8f9fa;border-radius:10px;padding:12px;display:none">
+          <div id="gl" class="fw-bold" style="font-size:14px">—</div>
+          <div style="display:flex;border-radius:6px;overflow:hidden;height:6px;margin-top:8px">
+            <div style="flex:1;background:#3498db"></div><div style="flex:1;background:#27ae60"></div>
+            <div style="flex:1;background:#f39c12"></div><div style="flex:1;background:#e74c3c"></div>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:10px;color:#888;margin-top:3px"><span>&lt;70 Low</span><span>70-99 Normal</span><span>100-125 Pre-D</span><span>126+ Diabetic</span></div>
+        </div>
+        <div class="hint mt-2">💡 Morning reading before eating = fasting glucose</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc">
+    <h5><span style="background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-right:8px;">3</span>Daily Lifestyle</h5>
+    <div class="row g-3">
+      <div class="col-6 col-md-4"><label class="form-label">Sleep (hrs)</label><input type="number" name="sleep_hours" class="form-control" step="0.5" min="2" max="14" placeholder="7" required></div>
+      <div class="col-6 col-md-4"><label class="form-label">Exercise (min/day)</label><input type="number" name="activity_mins" class="form-control" min="0" max="300" placeholder="30" required></div>
+      <div class="col-6 col-md-4"><label class="form-label">Screen time (hrs)</label><input type="number" name="screen_time" class="form-control" step="0.5" min="0" max="24" placeholder="6" required></div>
+      <div class="col-12">
+        <label class="form-label">Stress Level: <strong id="sv" class="text-primary">5</strong>/10</label>
+        <input type="range" name="stress" class="form-range" min="1" max="10" value="5" oninput="document.getElementById('sv').textContent=this.value">
+      </div>
+    </div>
+  </div>
+
+  <div class="fc">
+    <h5><span style="background:linear-gradient(135deg,#1e3a5f,#0d6e6e);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-right:8px;">4</span>Risk Factors <small class="text-muted fw-normal">(for BP estimate)</small></h5>
+    <div class="row g-3">
+      <div class="col-6 col-md-3"><label class="form-label">Smoking</label><select name="smoking" class="form-select"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <div class="col-6 col-md-3"><label class="form-label">Alcohol</label><select name="alcohol" class="form-select"><option value="never">Never</option><option value="rarely">Rarely</option><option value="weekly">Weekly</option><option value="daily">Daily</option></select></div>
+      <div class="col-6 col-md-3"><label class="form-label">Salt Intake</label><select name="salt_intake" class="form-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+      <div class="col-6 col-md-3"><label class="form-label">Family BP?</label><select name="family_history_bp" class="form-select"><option value="no">No</option><option value="yes">Yes</option></select></div>
+    </div>
+  </div>
+
+  <button type="submit" class="sbtn mb-4">🧮 Calculate BMI, BP & Glucose Now</button>
+</form>
+</div></div>
+{% endif %}
+
 </div>
 
 <script>
-    function calculateBMI() {
-        const w = parseFloat(document.getElementById('weight').value);
-        const h = parseFloat(document.getElementById('height').value) / 100;
-
-        if (w && h) {
-            const bmi = (w / (h * h)).toFixed(1);
-            let status = 'Normal';
-            let color = 'text-success';
-
-            if (bmi < 18.5) { status = 'Underweight'; color = 'text-warning'; }
-            else if (bmi >= 25) { status = 'Overweight'; color = 'text-warning'; }
-            else if (bmi >= 30) { status = 'Obese'; color = 'text-danger'; }
-
-            const resDiv = document.getElementById('bmiResult');
-            resDiv.style.display = 'block';
-            resDiv.innerHTML = `Your BMI: <span class="${color} fs-4">${bmi}</span> (${status})`;
-        }
-    }
+function lbmi(){
+  const w=parseFloat(document.getElementById('wt').value),h=parseFloat(document.getElementById('ht').value)/100;
+  if(w>0&&h>0.5){
+    const b=(w/(h*h)).toFixed(1);
+    const c=b<18.5?'🔵 Underweight':b<25?'🟢 Normal':b<30?'🟡 Overweight':'🔴 Obese';
+    document.getElementById('lbv').textContent=b;
+    document.getElementById('lbc').textContent=c;
+    document.getElementById('bmiLive').style.display='block';
+  }
+}
+function ginfo(){
+  const g=parseFloat(document.getElementById('gi').value),box=document.getElementById('gbox'),lbl=document.getElementById('gl');
+  if(!g||isNaN(g)){box.style.display='none';return;}
+  box.style.display='block';
+  if(g<70){lbl.textContent='🔵 Low — eat something now';lbl.style.color='#3498db';}
+  else if(g<=99){lbl.textContent='🟢 Normal fasting glucose';lbl.style.color='#27ae60';}
+  else if(g<=125){lbl.textContent='🟡 Pre-Diabetic range';lbl.style.color='#f39c12';}
+  else{lbl.textContent='🔴 Diabetic range — see a doctor';lbl.style.color='#e74c3c';}
+}
 </script>
 {% endblock %}

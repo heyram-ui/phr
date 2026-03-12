@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Report - {{ user[1] }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .report-header {
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #0d6efd;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            margin-top: 30px;
+        }
+
+        .risk-badge {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+
+        .bg-High {
+            background-color: #ffe5e5;
+            color: #dc3545;
+        }
+
+        .bg-Medium {
+            background-color: #fff3cd;
+            color: #ffc107;
+        }
+
+        .bg-Low {
+            background-color: #d1e7dd;
+            color: #198754;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="py-5" onload="window.print()">
+
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3 no-print">
+            <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i>Print
+                Report</button>
+            <a href="/profile" class="btn btn-outline-secondary ms-2">Back to Profile</a>
+        </div>
+
+        <!-- Header -->
+        <div class="report-header d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold mb-0"><i class="fas fa-heartbeat text-danger me-2"></i>HealthRisk AI</h1>
+                <p class="text-muted mb-0">Automated Medical Assessment Report</p>
+            </div>
+            <div class="text-end">
+                <h5 class="mb-0">Date: {{ date }}</h5>
+                <small class="text-muted">Report ID: #{{ assessment[0] if assessment else 'NEW' }}</small>
+            </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <h5 class="text-uppercase text-muted small fw-bold">Patient Details</h5>
+                <h3 class="fw-bold">{{ user[1] }}</h3>
+                <p class="mb-1"><strong>Age:</strong> {{ user[4] }} Years</p>
+                <p class="mb-1"><strong>Email:</strong> {{ user[2] }}</p>
+                <p class="mb-1"><strong>Emergency Contact:</strong> {{ user[6] or 'Not Provided' }}</p>
+            </div>
+            <div class="col-6 text-end">
+                <h5 class="text-uppercase text-muted small fw-bold">Overall Status</h5>
+                {% if assessment %}
+                <span
+                    class="badge {{ 'bg-danger' if assessment[19] == 'High Risk' else 'bg-success' }} fs-4 text-white">
+                    {{ assessment[19] }}
+                </span>
+                <p class="mt-2 text-muted">Health Score: <strong>{{ assessment[18]|round }} / 100</strong></p>
+                {% else %}
+                <p>No assessment data available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if assessment %}
+        <!-- Vitals -->
+        <h4 class="section-title"><i class="fas fa-notes-medical me-2"></i>Clinical Vitals</h4>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Measurement</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Blood Pressure</td>
+                    <td>{{ assessment[2] }}/{{ assessment[3] }} mmHg</td>
+                    <td>{{ 'Elevated' if assessment[2] > 120 or assessment[3] > 80 else 'Normal' }}</td>
+                </tr>
+                <tr>
+                    <td>BMI (Body Mass Index)</td>
+                    <td>{{ assessment[5] }}</td>
+                    <td>{{ assessment[17] }}</td> <!-- Obesity Risk Level used as proxy -->
+                </tr>
+                <tr>
+                    <td>Blood Glucose</td>
+                    <td>{{ assessment[4] }} mg/dL</td>
+                    <td>{{ 'High' if assessment[4] > 140 else 'Normal' }}</td>
+                </tr>
+                <tr>
+                    <td>Sleep Duration</td>
+                    <td>{{ assessment[8] }} Hours</td>
+                    <td>{{ 'Insufficient' if assessment[8] < 7 else 'Adequate' }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Risk Analysis -->
+        <h4 class="section-title"><i class="fas fa-chart-pie me-2"></i>Risk Analysis</h4>
+        <div class="row g-3">
+            <div class="col-4">
+                <div class="border p-3 rounded text-center bg-{{ assessment[11] }}">
+                    <small class="d-block text-muted">Heart Disease</small>
+                    <strong>{{ assessment[11] }}</strong>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="border p-3 rounded text-center bg-{{ assessment[12] }}">
+                    <small class="d-block text-muted">Diabetes</small>
+                    <strong>{{ assessment[12] }}</strong>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="border p-3 rounded text-center bg-{{ assessment[13] }}">
+                    <small class="d-block text-muted">Hypertension</small>
+                    <strong>{{ assessment[13] }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recovery Plan -->
+        {% if recovery %}
+        <div class="break-before">
+            <h4 class="section-title"><i class="fas fa-file-prescription me-2"></i>Prescribed Recovery Plan</h4>
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Focus Area: {{ recovery.issue }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ recovery.full_data.struggle }}</p>
+
+                    <h5 class="text-primary mt-4">1. Yoga & Rehabilitation</h5>
+                    <ul>
+                        {% for yoga in recovery.full_data.recovery.yoga %}
+                        <li class="mb-2">
+                            <strong>{{ yoga.name }}</strong><br>
+                            <span class="text-muted">{{ yoga.step }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h5 class="text-danger mt-4">2. Dietary Guidelines</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong class="text-success">Recommended:</strong>
+                            <ul>
+                                {% for item in recovery.full_data.recovery.diet.good %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <strong class="text-danger">Avoid:</strong>
+                            <ul>
+                                {% for item in recovery.full_data.recovery.diet.bad %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        <i class="fas fa-info-circle me-2"></i><strong>WHO Standard:</strong> {{
+                        recovery.full_data.who_std }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="mt-5 pt-4 text-center text-muted border-top">
+            <p class="small mb-0">Generated by HealthRisk AI System | © 2026. This report is for educational purposes
+                only.</p>
+            <p class="small">Consult a certified medical professional for diagnosis.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

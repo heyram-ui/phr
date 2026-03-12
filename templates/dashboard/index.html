@@ -1,98 +1,205 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-4 animate-in">
-    <div class="col-md-8">
-        <h2 class="text-white-shadow">Welcome back, {{ user.name }}!</h2>
-        <p class="text-white">Here is your daily health tracking overview.</p>
-    </div>
-    <div class="col-md-4 text-end">
-        <a href="/assess" class="btn btn-glass"><i class="fas fa-plus me-2"></i>New Daily Entry</a>
-    </div>
-</div>
+<div class="container py-5">
+    
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 fade-in-up">
+        <div class="mb-3 mb-md-0">
+            <h1 class="fw-bold mb-1 text-dark">Welcome back, {{ user.name }} 👋</h1>
+            <p class="text-muted mb-0">Your daily health intelligence summary.</p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <a href="/profile" class="btn btn-white shadow-sm btn-pill fw-bold text-dark border">
+                <i class="fas fa-user-circle me-2 text-primary"></i>My Profile
+            </a>
 
-<div class="row g-4 mb-5 animate-in" style="animation-delay: 0.1s;">
-    <!-- Summary Cards -->
-    <div class="col-md-3">
-        <div class="glass-card text-center p-3 h-100">
-            <h6 class="text-muted">Avg Health Score</h6>
-            <h1 class="display-4 fw-bold text-primary">{{ avg_score|round|int }}</h1>
+            <button class="btn btn-white shadow-sm btn-pill fw-bold text-dark border" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                <i class="fas fa-star me-2 text-warning"></i>Rate
+            </button>
+            
+            <a href="/assess" class="btn btn-primary-modern btn-modern shadow-lg">
+                <i class="fas fa-plus-circle"></i> New Checkup
+            </a>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="glass-card text-center p-3 h-100">
-            <h6 class="text-muted">Total Assessments</h6>
-            <h1 class="display-4 fw-bold">{{ total_assessments }}</h1>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="glass-card p-3 h-100 d-flex align-items-center justify-content-center bg-danger text-white"
-            style="background: {{ 'rgba(220, 53, 69, 0.8)' if last_risk == 'High Risk' else 'rgba(40, 167, 69, 0.6)' }}">
-            <div>
-                <h6 class="mb-1">Current Status</h6>
-                <h2 class="mb-0">{{ last_risk or 'No Data' }}</h2>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row g-4 animate-in" style="animation-delay: 0.2s;">
-    <div class="col-lg-8">
-        <div class="glass-card">
-            <h4 class="mb-4">Health Score Trend</h4>
-            <div class="chart-container">
-                <canvas id="trendChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="glass-card">
-            <h4 class="mb-4">Recent Activity</h4>
-            <div class="list-group list-group-flush bg-transparent">
-                {% for record in recent_history %}
-                <div class="list-group-item bg-transparent border-bottom border-light text-dark">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">{{ record.created_at }}</h6>
-                        <span class="badge {{ 'bg-danger' if record.risk_level == 'High Risk' else 'bg-success' }}">
-                            {{ record.risk_score }}
-                        </span>
-                    </div>
-                    <p class="mb-1 small">{{ record.risk_level }}</p>
+    <div class="row g-4">
+        
+        <div class="col-lg-4 fade-in-up delay-1">
+            <div class="health-card featured position-relative overflow-hidden text-center h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+                    <span class="text-white opacity-75 fw-bold text-uppercase small">Current Status</span>
+                    <span class="badge bg-white text-primary fw-bold">{{ last_risk or 'Unknown' }}</span>
                 </div>
-                {% endfor %}
+                
+                <div class="risk-ring-container mb-3">
+                    <svg width="160" height="160">
+                        <circle class="risk-ring-bg" cx="80" cy="80" r="70"></circle>
+                        <circle class="risk-ring-progress" cx="80" cy="80" r="70" id="scoreRing"></circle>
+                    </svg>
+                    <div class="risk-score-text">
+                        {% if scores %}
+                            <h1 class="mb-0 fw-bold display-4" id="scoreValue">{{ scores[-1] }}</h1>
+                            <small class="opacity-75 small">% Risk</small>
+                        {% else %}
+                            <h1 class="mb-0 fw-bold display-4">0</h1>
+                            <small class="opacity-75">No Data</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <p class="text-white opacity-75 small mb-0 mt-3">
+                    Based on {{ total_assessments }} total assessments.
+                </p>
             </div>
+        </div>
+
+        <div class="col-lg-8 fade-in-up delay-2">
+            <div class="health-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-dark">Health Trend Analysis</h5>
+                    <span class="badge bg-success-soft">
+                        <i class="fas fa-chart-line me-1"></i> Avg Score: {{ avg_score|round(1) }}
+                    </span>
+                </div>
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="healthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if recovery %}
+    <div class="row mt-4 fade-in-up delay-3">
+        <div class="col-12">
+            <div class="health-card border-warning" style="border-left: 5px solid #f59e0b;">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-warning-soft text-warning rounded-3 p-3 me-3">
+                                <i class="fas fa-user-md fa-2x"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1 text-dark">Attention Needed: {{ recovery.issue }}</h4>
+                                <p class="text-muted mb-3">{{ recovery.insight }}</p>
+                                
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <div class="badge bg-light text-dark border p-2">
+                                        🧘 Yoga: {{ recovery.yoga|join(', ') }}
+                                    </div>
+                                    <div class="badge bg-light text-dark border p-2">
+                                        🥗 Diet: {{ recovery.diet|join(', ') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mt-3 mt-md-0">
+                        <a href="/encyclopedia" class="btn btn-outline-dark rounded-pill w-100">
+                            View Full Recovery Guide
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content health-card border-0 p-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Rate Your Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/submit-feedback" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">RATING</label>
+                        <select name="rating" class="form-control">
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Good</option>
+                            <option value="3">⭐⭐⭐ Average</option>
+                            <option value="2">⭐⭐ Poor</option>
+                            <option value="1">⭐ Terrible</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">COMMENTS</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="How can we improve?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary-modern rounded-pill px-4">Submit Feedback</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    const trendChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ dates| tojson }},
-    datasets: [{
-        label: 'Health Score',
-        data: {{ scores| tojson }},
-        borderColor: '#4361ee',
-        backgroundColor: 'rgba(67, 97, 238, 0.2)',
-        tension: 0.4,
-        fill: true
-            }]
-        },
-    options: {
-        responsive: true,
-            maintainAspectRatio: false,
-                plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                    max: 100
-            }
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- 1. ANIMATE THE RING ---
+        const circle = document.getElementById('scoreRing');
+        if(circle) {
+            const scoreElement = document.getElementById('scoreValue');
+            const score = scoreElement ? parseInt(scoreElement.innerText) : 0;
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = circumference;
+
+            // Calculate offset (100% = 0 offset)
+            const offset = circumference - (score / 100) * circumference;
+            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 500);
         }
-    }
+
+        // --- 2. RENDER THE CHART ---
+        const ctx = document.getElementById('healthChart');
+        if (ctx) {
+            // 
+            const dates = {{ dates | tojson | safe }};
+            const scores = {{ scores | tojson | safe }};
+            
+            let gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(79, 70, 229, 0.2)');
+            gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.length ? dates : ['No Data'],
+                    datasets: [{
+                        label: 'Risk Level',
+                        data: scores.length ? scores : [0],
+                        borderColor: '#4f46e5',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4f46e5',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { borderDash: [5, 5], color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

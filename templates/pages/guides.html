@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center animate-in">
+    <div class="col-lg-8">
+        <h2 class="text-white-shadow text-center mb-5">Manual Health Checks</h2>
+        <p class="text-center text-muted mb-5">No device? Here is how to estimate your vitals.</p>
+
+        <!-- Pulse / Heart Rate -->
+        <div class="glass-card mb-4 border-start border-5 border-primary">
+            <div class="d-flex">
+                <div class="me-4 d-none d-md-block">
+                    <i class="fas fa-heartbeat fa-3x text-primary"></i>
+                </div>
+                <div>
+                    <h4 class="mb-3">Checking Heart Rate (Pulse)</h4>
+                    <ol>
+                        <li class="mb-2">Place two fingers (index and middle) on your wrist, below the thumb.</li>
+                        <li class="mb-2">Feel for a pulsing sensation.</li>
+                        <li class="mb-2">Count the beats for 15 seconds.</li>
+                        <li>Multiply by 4 to get beats per minute (BPM).</li>
+                    </ol>
+                    <div class="alert alert-info mt-3 p-2 small">
+                        <strong>Normal Range:</strong> 60 - 100 BPM
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Pressure Symptoms -->
+        <div class="glass-card mb-4 border-start border-5 border-danger">
+            <div class="d-flex">
+                <div class="me-4 d-none d-md-block">
+                    <i class="fas fa-tachometer-alt fa-3x text-danger"></i>
+                </div>
+                <div>
+                    <h4 class="mb-3">High Blood Pressure Signs</h4>
+                    <p class="text-muted small">BP cannot be measured accurately without a cuff, but watch for these
+                        symptoms:</p>
+                    <ul class="mb-0">
+                        <li>Severe headaches</li>
+                        <li>Nosebleed</li>
+                        <li>Fatigue or confusion</li>
+                        <li>Vision problems</li>
+                        <li>Chest pain</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diabetes Symptoms -->
+        <div class="glass-card border-start border-5 border-warning">
+            <div class="d-flex">
+                <div class="me-4 d-none d-md-block">
+                    <i class="fas fa-tint fa-3x text-warning"></i>
+                </div>
+                <div>
+                    <h4 class="mb-3">High Blood Sugar Signs</h4>
+                    <p class="text-muted small">Watch for these indicators of Hyperglycemia:</p>
+                    <ul class="mb-0">
+                        <li>Increased thirst and dry mouth</li>
+                        <li>Frequent urination</li>
+                        <li>Blurred vision</li>
+                        <li>Unintended weight loss</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
